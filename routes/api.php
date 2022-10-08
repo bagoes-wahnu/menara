@@ -20,6 +20,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::get('/tower/json', [TowerApiController::class,'json'])->name('tower.json');
+Route::get('/tower/search_json', [TowerApiController::class,'search_json'])->name('tower.search.json');
 Route::get('/tower/show_json/{gid}', [TowerApiController::class,'show_json'])->name('tower.show.json');
-Route::post('/tower/store_json/{gid}', [TowerApiController::class,'store_json'])->name('tower.store.json');
+Route::post('/tower/store_json', [TowerApiController::class,'store_json'])->name('tower.store.json');
 Route::delete('/tower/delete_json/{gid}', [TowerApiController::class,'delete_json'])->name('tower.delete.json');

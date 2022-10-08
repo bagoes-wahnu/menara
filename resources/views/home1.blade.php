@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="{{asset("plugins/datatables-buttons/css/buttons.bootstrap4.min.css")}}">
   <link rel="stylesheet" href="{{asset("plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css")}}">
   <link rel="stylesheet" href="{{asset("plugins/toastr/toastr.min.css")}}">
+  <link rel="stylesheet" href="{{asset('plugins/select2/css/select2.min.css')}}">
   <link rel="stylesheet" href="{{asset("dist/css/adminlte.min.css")}}">
 </head>
 <script>
@@ -138,7 +139,54 @@
           <div class="col-12">
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title">List Semua Data Menara</h3>
+                <div class="row">
+                  <div class="col-md-10 offset-md-1">
+                    {{-- <form action="{{ route('pertelaan.search.json') }}" method="get"> --}}
+                    <form action="{{url("/api/tower/search_json")}}" id="input-search" method="get">
+                    <div class="row">
+                      <div class="col-3">
+                        <div class="form-group">
+                          <label>Pilih Kolom:</label>
+                          <select class="select2" name="kolom" id="kolom" style="width: 100%;">
+                              <option value="gid">GID</option>
+                              <option value="provider">Provider</option>
+                              <option value="tipe_tower">Tipe Tower</option>
+                              <option value="tinggi_tower">Tinggi Tower</option>
+                              <option value="no_upt_skrk">No UPT SKRK</option>
+                              <option value="no_upt">No UPT IMB</option>
+                              <option value="sk_skrk">SK SKRK</option>
+                              <option value="sk_imb">SK IMB</option>
+                              <option value="nama_pemohon">Nama Pemohon</option>
+                              <option value="alamat_pemohon">Alamat Pemohon</option>
+                              <option value="alamat_tower">Alamat Tower</option>
+                              <option value="jenis_data">Jenis Data</option>
+                              <option value="kelurahan">Kelurahan</option>
+                              <option value="kecamatan">Kecamatan</option>
+                              <option value="izin">Izin</option>
+                              <option value="ket_imb">Keterangan IMB</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="col-3">
+                        <div class="form-group">
+                          <label>Masukkan Nilai:</label>
+                          <input type="text" name="nilai" id="nilai" class="form-control"/>
+                        </div>
+                      </div>
+                      <div class="col-3">
+                        <div class="form-group">
+                          <label>Cari Data:</label>
+                          <div class="input-group-append">
+                              <button type="submit" class="btn btn-default">
+                                  <i class="fa fa-search"></i>
+                              </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    </form>
+                  </div>
+                </div>
               </div>
               <!-- /.card-header -->
               <div class="card-body">
@@ -301,10 +349,14 @@
 <script src="{{asset("plugins/datatables-buttons/js/buttons.colVis.min.js")}}"></script>
 <script src="{{asset("plugins/sweetalert2/sweetalert2.min.js")}}"></script>
 <script src="{{asset("plugins/toastr/toastr.min.js")}}"></script>
+<script src="{{asset('plugins/select2/js/select2.full.min.js')}}"></script>
 <!-- AdminLTE App -->
 <script src="{{asset("dist/js/adminlte.min.js")}}"></script>
 <!-- Page specific script -->
 <script>
+  $(function () {
+    $('.select2').select2()
+  });
 	// let baseUrl = "{{asset('/')}}";
 	console.log(baseUrl);
   $('.toastrDefaultSuccess').click(function() {
@@ -331,6 +383,8 @@
   // });
   function table() {
     $('#example2').DataTable({
+    "dom": 'Bfrtip',
+    "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
     "bDestroy": true,
 		"paging": true,
 		"lengthChange": false,
@@ -347,6 +401,7 @@
 			"type": "GET",
 			"data":{ _token: "{{csrf_token()}}"}
 			},
+      "order":[0,'asc'],
 			"columns": [
 			// {data: 'DT_RowIndex', name: 'id'},
 			{data: 'gid', name: 'gid'},
@@ -362,7 +417,7 @@
 			{data: 'action', orderable: false, searcable: false}
 			],
       // 'order' : [[0,'desc']]
-		});
+		}).buttons().container().appendTo('#example2_wrapper .col-md-6:eq(0)');
   }
   function show_json(gid){
     // console.log($('#gid').val(data.gid));
@@ -683,6 +738,57 @@
         }
     });
   }
+  $("#input-search").on("submit", function (e) {
+    var dataString = $(this).serialize();
+    console.log(dataString);
+    $.ajax({
+      type: "GET",
+      url: baseUrl+"api/tower/search_json",
+      data: dataString,
+      success: function () {
+        // Display message back to the user here
+        // search()
+        $('#example2').DataTable({
+        "dom": 'Bfrtip',
+        "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+        "bDestroy": true,
+        "paging": true,
+        "lengthChange": false,
+        "searching": true,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
+        "processing": true,
+        "serverSide": false,
+        "ajax": {
+            "url": baseUrl+"api/tower/search_json?"+dataString,
+            "dataType": "json",
+            "type": "GET",
+            "data":{ _token: "{{csrf_token()}}"}
+        },
+        "order":[0,'asc'],
+        "columns": [
+            // {data: 'DT_RowIndex', name: 'id'},
+            {data: 'gid', name: 'gid'},
+            {data: 'sk_imb'},
+            {data: 'provider'},
+            {data: 'kelurahan'},
+            {data: 'kecamatan'},
+            {data: 'tipe_tower'},
+            {data: 'tinggi_tower'},
+            {data: 'alamat_tower'},
+            {data: 'sk_skrk'},
+            {data: 'action', orderable: false, searcable: false}
+        ],
+        }).buttons().container().appendTo('#example2_wrapper .col-md-6:eq(0)');
+        // res = response;
+        // console.log(res);
+      }
+    });
+ 
+    e.preventDefault();
+  });
 </script>
 </body>
 </html>

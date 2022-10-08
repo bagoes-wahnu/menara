@@ -178,7 +178,7 @@
                       <td>{{ $aspects->alamat_pemohon }}</td>
                     </tr>
                     <tr>
-                      <th>Alamat Persil</th>
+                      <th>Alamat Tower</th>
                       <td>{{ $aspects->alamat_tower }}</td>
                     </tr>
                     <tr>

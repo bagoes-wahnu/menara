@@ -15,7 +15,11 @@ class TowerApiController extends Controller
 {
     public function json(Request $request){
         if ($request->ajax()) {
-            $data = Tower::select('gid','sk_imb','kelurahan','kecamatan','provider','tipe_tower','tinggi_tower','alamat_tower','sk_skrk');
+            $data = Tower::select('gid','provider','tipe_tower','tinggi_tower', 'no_upt_skrk',
+            'no_upt', 'sk_skrk', 'sk_imb', 'nama_pemohon', 'alamat_pemohon','alamat_tower',
+            'jenis_data','kelurahan','kecamatan','izin','ket_imb','scan_skrk','scan_zoning'
+            ,'scan_imb','scan_gambar_imb'
+            )->limit(10000);
             return Datatables::of($data)
                     ->addIndexColumn()
                     ->addColumn('action', function($data){
@@ -126,5 +130,42 @@ class TowerApiController extends Controller
         // dd(File::delete(public_path('scan_imb/'.$data->scan_imb)));
         Tower::find($gid)->delete();
         return response()->json(['success'=>'Data Tower deleted successfully.']);
+    }
+    public function search_json(Request $request){
+        // dd($request->all());
+        if ($request->ajax()) {
+            // dd($request->kolom);
+            $data = Tower::select('gid','provider','tipe_tower','tinggi_tower', 'no_upt_skrk',
+            'no_upt', 'sk_skrk', 'sk_imb', 'nama_pemohon', 'alamat_pemohon','alamat_tower',
+            'jenis_data','kelurahan','kecamatan','izin','ket_imb','scan_skrk','scan_zoning'
+            ,'scan_imb','scan_gambar_imb'
+            )->limit(10000);
+            if ($request->kolom != '' && $request->nilai != '') {
+                // dd($data->where("'$request->kolom'" == 1));
+                // $data = $data->where($request->kolom, $request->nilai);
+                $data = $data->where($request->kolom, 'LIKE', '%' . $request->nilai . '%');
+                $count = $data->count();
+                // dd($count);
+            }
+            return Datatables::of($data)
+                    ->addIndexColumn()
+                    ->addColumn('action', function($data){
+                        // $gid = $data->gid;
+                        // dd($gid);
+                        $view = route('show', $data);
+                        $btn = '<input type="hidden" name="gid" id="gid" value="'.$data->gid.'">';
+                        $btn = $btn . '<a href="'.$view.'" target="_blank" onclick="show_json('.$data->gid.')" data-gid="'.$data->gid.'" class="edit btn btn-info btn-sm mr-2 mb-2">
+                        View
+                        </a>';
+                        $btn = $btn . '<a href="javascript:void(0)" onclick="edit_json('.$data->gid.')" data-gid="'.$data->gid.'" data-toggle="modal" data-target="#modal-lg" class="edit btn btn-primary btn-sm mr-2 mb-2">
+                        Update
+                        </a>';
+                        return $btn;
+                    })
+                    ->rawColumns(['action'])
+                    ->make(true);
+        }
+        // return view('home2');
+        return response()->json(['success'=>'Data Ditemukan.']);
     }
 }
